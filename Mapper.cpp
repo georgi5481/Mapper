@@ -47,9 +47,24 @@ int main() {
 
 	Mapper obj;
 
-	double sensor(0);
-	for (unsigned int i = 0; obj.integrate( i, sensor) != 0 && std::cin.fail(); i++) {			//i is basically simulating a time and since there is no negative time - using unsigned int 
-		std::cin >> sensor;	//simulating a censor inputs
+	double aheadSensor, lefwardSensor, asternSensor, rightwardSensor;
+	double xVectorVelocity(1), yVectorVelocity(0); //since the initial velocity is x=1 and y=0
+
+	for (unsigned int i = 0; i <= 3 && std::cin.fail(); i++) {			//i is basically simulating a time and since there is no negative time - using unsigned int 
+		std::cin >> aheadSensor >> lefwardSensor >> asternSensor >> rightwardSensor;	//simulating a censor inputs of 4 doubles
+
+		if (std::cin.peek() != '\n') {
+			double xVelocity(0), yVelocity(0);
+			std::cin >> xVelocity >> yVelocity;	
+
+			if ( (((xVelocity == 1 || xVelocity == -1) && yVelocity == 0) ||	//checks for correct imput for the velocity vector
+				  ((yVelocity == 1 || yVelocity == -1) && xVelocity == 0) ) && !std::cin.fail())    //since we can only go 1 way with 1 m/s  
+			{
+				xVectorVelocity = xVelocity;
+				yVectorVelocity = yVelocity;
+			}
+		}
+
 	}
 
 
