@@ -7,8 +7,9 @@
 template<class T>
 class Mapper : public IMapper<T> {
 public:
-	Mapper() : velocity(1, 0)	//sets the initial velocity
+	Mapper() : velocity(1, 0), right(1, 0), up(0, 1), left(-1, 0), down(0, -1)	//sets the initial velocity and the helping direction
 	{
+		
 	}
 	const Vec2<T>& getPosition() const {
 		return position;
@@ -22,73 +23,97 @@ public:
 		return border;
 
 	}
+	Vec2<T> whereToGo(T ahead, T ) {
+
+
+	}
+
+
 	int integrate(T dt, const T* sensor) {
-		//write logic for searching
 
 		position.x += (velocity.x * dt);	//calculate the postion at the moment
 		position.y += (velocity.y * dt);
 
-		for (unsigned int i = 0; i <= 3; i++) {
+		T ahead = *sensor;
+		T leftward = (*(sensor + 1));		//getting out the 4 values from the array
+		T astern = (*(sensor + 2));
+		T rightward = (*(sensor + 3));
 
-			T sensorValue = (*(sensor + i));
+		T sensorValue;
+		bool ifRight = (velocity.x == right.x && velocity.y == right.y);
+		bool ifLeft = (velocity.x == left.x && velocity.y == left.y);
+		bool ifDown = (velocity.x == down.x && velocity.y == down.y);
+		bool ifUp = (velocity.x == up.x && velocity.y == up.y);
 
-			if (sensorValue >= 0 && sensorValue <= 1) {	//check if there is a sensor value
-
-				Vec2<T> foundBorderCoordinates;
-
-				if (i % 2 == 1) {	//picks the left or right sensor value from the array
-										
-
-					if (velocity.x == 1 || velocity.x == -1) {	//check which side we were going  left or right
-						foundBorderCoordinates.x += (sensorValue + position.x);
-					}
-					else {
-						foundBorderCoordinates.y += (sensorValue + position.y);
-					}
-				}
-				else if (i % 2 == 0) {	//pick ahead or astern sensor value
-					if ((velocity.y == 1 || velocity.y == -1)) {	//checks  which side we were going
-						foundBorderCoordinates.y += (sensorValue + position.y);
-					}
-					else {
-						foundBorderCoordinates.x += (sensorValue + position.x);
-					}
-				
-				}
-				else {
-					throw "There has been an error. Velocity out of range";
-				}
-
-				border.saveBorderCordinates(foundBorderCoordinates);
-
-			}
-			else {	//if there isn't an input sensor value
-
-			}
+		if (ifRight) {
+			sensorValue = rightward;
+		}
+		else if (ifLeft) {
+			sensorValue = ahead;
+		}
+		else if (ifDown) {
+			sensorValue = leftward;
+		}
+		else if (ifUp) {
+			sensorValue = astern;
+		}
+		else {
+			throw "There has been an error. Velocity out of range";
 		}
 
-			return 1;
-
-			/*if ()//we completed the map or there is some error
-				{
-					return 0;
+			if (sensorValue >= 0 && sensorValue <= 1) {	//check if the sensor value is in range
+			
+				Vec2<T> foundBorderCoordinates = position;
+				
+					if (ifRight) {	//check which side we were going right, left, up or down
+						foundBorderCoordinates.x += sensorValue;
+						velocity = up;
+					}
+					else if(ifLeft)
+					{
+						foundBorderCoordinates.x -= sensorValue ;
+						velocity = down;
+					}
+					if (ifUp) 
+					{
+						foundBorderCoordinates.y +=sensorValue;
+						velocity = left;
+					}
+					else if (ifDown) 
+					{
+						foundBorderCoordinates.y -= sensorValue;
+						velocity = right;
+					}
+					border.saveBorderCordinates(foundBorderCoordinates);
+					
 				}
-			}*/
+
+				
+
+			previousVelocity = velocity;
+
+			return 1;
 		
 	}
 private:
 	Vec2<T> position;	//the base constructor of Vec2 sets the X and Y cordinates to 0
 	Vec2<T> velocity;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
+	Vec2<T> previousVelocity; //will save the last path used
+	Vec2<T> right;	
+	Vec2<T> up;
+	Vec2<T> left;
+	Vec2<T> down;
+	Vec2<T> pathVelocity[4] = { right, up, left, down };
 	Border<T> border;
 };
 
 
 int main() {
 	Mapper<double> gosho;
-	double matrix[4] = { -1, -1, 0.5, -1 };
+	double matrix[4] = { -1, -1, -1, 0.3 };
 	const double* pointerMatrix = matrix;
-	for (double i = 0.1; i < 0.9 ; (i+0.1)) {
-		gosho.integrate(i, pointerMatrix);
+	for (double i = 0.1; i < 0.3 ; i=i+0.1) {
+		gosho.integrate(i, matrix);
 	}
 	return 0;
 }
