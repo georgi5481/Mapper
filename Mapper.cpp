@@ -28,21 +28,32 @@ public:
 		position.x += (velocity.x * dt);	//calculate the postion at the moment
 		position.y += (velocity.y * dt);
 
-	/*	T ahead = *sensor;
-		T leftward = (*(sensor + 1));
-		T astern = (*(sensor + 2));
-		T rightward = (*(sensor + 3));*/
-
 		for (unsigned int i = 0; i <= 3; i++) {
-			if ((*(sensor+i)) >= 0 && (*(sensor+i)) <= 1) {	//check if there is a sensor value
+
+			T sensorValue = (*(sensor + i));
+
+			if (sensorValue >= 0 && sensorValue <= 1) {	//check if there is a sensor value
 
 				Vec2<T> foundBorderCoordinates;
 
-				if (velocity.x == 1 || velocity.x == -1) {	//check which side we were going
-					foundBorderCoordinates.x += ((*sensor) + position.x);
+				if (i % 2 == 1) {	//picks the left or right sensor value from the array
+										
+
+					if (velocity.x == 1 || velocity.x == -1) {	//check which side we were going  left or right
+						foundBorderCoordinates.x += (sensorValue + position.x);
+					}
+					else {
+						foundBorderCoordinates.y += (sensorValue + position.y);
+					}
 				}
-				else if (velocity.y == 1 || velocity.y == -1) {
-					foundBorderCoordinates.y += ((*sensor) + position.y);
+				else if (i % 2 == 0) {	//pick ahead or astern sensor value
+					if ((velocity.y == 1 || velocity.y == -1)) {	//checks  which side we were going
+						foundBorderCoordinates.y += (sensorValue + position.y);
+					}
+					else {
+						foundBorderCoordinates.x += (sensorValue + position.x);
+					}
+				
 				}
 				else {
 					throw "There has been an error. Velocity out of range";
@@ -54,7 +65,7 @@ public:
 			else {	//if there isn't an input sensor value
 
 			}
-
+		}
 
 			return 1;
 
@@ -63,11 +74,11 @@ public:
 					return 0;
 				}
 			}*/
-		}
+		
 	}
 private:
 	Vec2<T> position;	//the base constructor of Vec2 sets the X and Y cordinates to 0
-	Vec2<T> velocity;	//the base constructor of Mapper will set the initial velocity to (1, 0)
+	Vec2<T> velocity;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
 	Border<T> border;
 };
 
