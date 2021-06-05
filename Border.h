@@ -1,23 +1,24 @@
 #pragma once
 #include "IBorder.h"
 #include <list>
-
-class Border : IBorder<double>
+template<class T>
+class Border : public IBorder<T>
 {
 public:
-	void saveBorderCordinates(double& xCoordinate, double& yCoordinate) {
-		Vec2<double> coordinatesPolyline(xCoordinate, yCoordinate);
-		polylines.push_back(coordinatesPolyline);
+	Border(){}
+
+	void saveBorderCordinates(Vec2<T>& input) {
+		polylines.push_back(input);
 	}
 
 	virtual int getCount() const {
 		return polylines.size();
 	}
-	virtual const Vec2<double>& operator[](int index) const {
+	virtual const Vec2<T>& operator[](int index) const {
 		return *(std::next(polylines.begin(), index));
 	}
 private:
-	std::list<Vec2<double>> polylines;
+	std::list<Vec2<T>> polylines;
 
 };
 
