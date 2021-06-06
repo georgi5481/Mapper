@@ -9,7 +9,7 @@ class Mapper : public IMapper<T> {
 public:
 	Mapper() : velocity(1, 0), right(1, 0), up(0, 1), left(-1, 0), down(0, -1)	//sets the initial velocity and the helping direction
 	{
-		
+
 	}
 	const Vec2<T>& getPosition() const {
 		return position;
@@ -23,9 +23,104 @@ public:
 		return border;
 
 	}
-	Vec2<T> whereToGo(T ahead, T ) {
+	 Vec2<T>& generatePosition(Vec2<T>& borderPosition, T xSensor, T ySensor) {
+		borderPosition.x += xSensor;
+		borderPosition.y += ySensor;
 
+		return borderPosition;
+	}
 
+	Vec2<T> whereToGo(T& aheadSensor, T& leftSensor, T& asternSensor, T& rightSensor) {
+
+		bool ifRight = (velocity.x == right.x && velocity.y == right.y);	//helping bools telling us where we are going atm.
+		bool ifLeft = (velocity.x == left.x && velocity.y == left.y);
+		bool ifDown = (velocity.x == down.x && velocity.y == down.y);
+		bool ifUp = (velocity.x == up.x && velocity.y == up.y);
+
+		if (ifRight) {	//if we move right
+			if (rightSensor >= 0) {
+				if (aheadSensor >= 0) {
+					if (leftSensor >= 0) {
+						velocity = down;
+					}
+					else {
+						velocity = left;
+					}
+				}
+				else {
+					velocity = up;
+				}
+			}
+			else {
+				if ( asternSensor < 0  && border.getCount() > 1) {
+					velocity = down;
+				}
+				else {
+					velocity = right;
+				}
+			}
+		}
+		else if (ifUp) { //if we move up
+			if (rightSensor >= 0) {
+				if (aheadSensor >= 0) {
+					if (leftSensor >= 0) {
+						velocity = down;
+					}
+					else {
+						velocity = left;
+					}
+				}
+				else {
+					velocity = up;
+				}
+			}
+			else {
+				velocity = right;
+			}
+		}
+		else if (ifDown) {	//if we move down
+			if (leftSensor >= 0) {
+				if (asternSensor >= 0) {
+					if (rightSensor >= 0) {
+						velocity = up;
+					}
+					else {
+						velocity = right;
+					}
+				}
+				else {
+					velocity = down;
+				}
+			}
+			else {
+				velocity = left;
+			}
+		}
+	
+		else if(ifLeft){ //if we move left
+			if (leftSensor >= 0) {
+				if (asternSensor >= 0) {
+					if (rightSensor >= 0) {
+						velocity = up;
+						}
+					else {
+						velocity = right;
+					}
+				}
+				else {
+					velocity = down;
+				}
+			}
+			else {
+				if (aheadSensor >= 0) {
+					velocity = left;
+				}
+				else {
+					velocity = up;
+				}
+			}
+		}
+		return velocity;
 	}
 
 
@@ -39,80 +134,50 @@ public:
 		T astern = (*(sensor + 2));
 		T rightward = (*(sensor + 3));
 
-		T sensorValue;
-		bool ifRight = (velocity.x == right.x && velocity.y == right.y);
-		bool ifLeft = (velocity.x == left.x && velocity.y == left.y);
-		bool ifDown = (velocity.x == down.x && velocity.y == down.y);
-		bool ifUp = (velocity.x == up.x && velocity.y == up.y);
+		velocity = whereToGo(ahead, leftward, astern, rightward);	//pick where to go next
 
-		if (ifRight) {
-			sensorValue = rightward;
+		Vec2<T> borderPosition = position;	//since it isn't good to return a reference from a method, declaring the object here not in the method below
+
+		if (ahead >= 0) {
+			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), ahead));	//saves every coordinate if a sensor has a positive value
 		}
-		else if (ifLeft) {
-			sensorValue = ahead;
+		if (leftward >= 0) {
+			border.saveBorderCordinates(generatePosition(borderPosition, -leftward, static_cast<T>(0)));
 		}
-		else if (ifDown) {
-			sensorValue = leftward;
+		if (astern >= 0) {
+			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), -astern));
 		}
-		else if (ifUp) {
-			sensorValue = astern;
+		if (rightward >= 0) {
+			border.saveBorderCordinates(generatePosition(borderPosition, rightward, static_cast<T>(0)));
+		}
+
+		if (ahead >= 0 && leftward >= 0 && astern >= 0 && rightward >= 0)	//in case the four sensors recieve a value
+		{
+			return 0;
 		}
 		else {
-			throw "There has been an error. Velocity out of range";
+			return border.checkIfLastBorder();
 		}
-
-			if (sensorValue >= 0 && sensorValue <= 1) {	//check if the sensor value is in range
-			
-				Vec2<T> foundBorderCoordinates = position;
-				
-					if (ifRight) {	//check which side we were going right, left, up or down
-						foundBorderCoordinates.x += sensorValue;
-						velocity = up;
-					}
-					else if(ifLeft)
-					{
-						foundBorderCoordinates.x -= sensorValue ;
-						velocity = down;
-					}
-					if (ifUp) 
-					{
-						foundBorderCoordinates.y +=sensorValue;
-						velocity = left;
-					}
-					else if (ifDown) 
-					{
-						foundBorderCoordinates.y -= sensorValue;
-						velocity = right;
-					}
-					border.saveBorderCordinates(foundBorderCoordinates);
-					
-				}
-
-				
-
-			previousVelocity = velocity;
-
-			return 1;
-		
 	}
 private:
 	Vec2<T> position;	//the base constructor of Vec2 sets the X and Y cordinates to 0
 	Vec2<T> velocity;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
-	Vec2<T> previousVelocity; //will save the last path used
 	Vec2<T> right;	
 	Vec2<T> up;
 	Vec2<T> left;
 	Vec2<T> down;
-	Vec2<T> pathVelocity[4] = { right, up, left, down };
+	//Vec2<T> pathVelocity[4] = { right, up, left, down };
 	Border<T> border;
 };
 
 
 int main() {
 	Mapper<double> gosho;
-	double matrix[4] = { -1, -1, -1, 0.3 };
+	double matrix[4] = { 1 , 1 , 1 ,1 };
 	const double* pointerMatrix = matrix;
-	for (double i = 0.1; i < 0.3 ; i=i+0.1) {
+	for (double i = 0.1; i < 0.9 ; i=i+0.1) {
+		std::cout << gosho.getVelocity().x << " " << gosho.getVelocity().y << '\n';
+
 		gosho.integrate(i, matrix);
 	}
 	return 0;
