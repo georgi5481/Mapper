@@ -32,11 +32,12 @@ int main() {		//this main method is just so i can check if the logic works corre
 
 	bool shouldMap = true;
 
-	realPositionX++;
+	realPositionX++;	//since we always start moving right we need the sensors right from us from the start position
+
 	std::cout << "Moving path: \n";
 	while (shouldMap) {
 		
-		double aheadSensor = array[realPositionY - 1][realPositionX];
+		double aheadSensor = array[realPositionY - 1][realPositionX];		//taking the sensors value
 		double leftSensor = array[realPositionY][realPositionX - 1];
 		double downSensor = array[realPositionY + 1][realPositionX];
 		double rightSensor = array[realPositionY][realPositionX + 1];
@@ -48,12 +49,13 @@ int main() {		//this main method is just so i can check if the logic works corre
 		int integrateResult = mapper.integrate(0.9, arrayPosition);
 
 		Vec2<double> velocity = mapper.getVelocity();
+
 		bool ifRight = (velocity.x == 1 && velocity.y == 0);	//helping bools telling us where we are going atm.
 		bool ifLeft = (velocity.x == -1 && velocity.y == 0);
 		bool ifDown = (velocity.x == 0 && velocity.y == -1);
 		bool ifUp = (velocity.x == 0 && velocity.y == 1);
 
-		if (ifRight)
+		if (ifRight)		//depending on where we go, we change position in the helping array we build
 		{
 			realPositionX++;
 		}
@@ -71,13 +73,14 @@ int main() {		//this main method is just so i can check if the logic works corre
 		}
 
 
-		if (integrateResult == 0) {
+		if (integrateResult == 0) {	//will edn the loop if we found the same stat up border point or is it really close 
 			shouldMap = false;
 		}
 	}
 	std::cout << '\n' << "Borders found : \n";
 	std::cout.precision(2);
-	for (int k = 0; k < (mapper.getBorder()).getCount(); k++ ) {
+
+	for (int k = 0; k < (mapper.getBorder()).getCount(); k++ ) {		//printing all the border points we found
 		std::cout << "X: " << std::fixed << ((mapper.getBorder())[k]).x << "  Y:  " << ((mapper.getBorder())[k]).y << '\n';
 	}
 	return 0;
