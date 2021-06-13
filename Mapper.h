@@ -77,7 +77,8 @@ public:
 
 		velocity = whereToGo(ahead, leftward, astern, rightward);	//pick where to go next
 
-		Vec2<T> borderPosition = position;	//since it isn't good to return a reference from a method, i'm declaring the object here not in the method below
+		Vec2<T> borderPosition = position;	//since it isn't good to return a reference from a method,
+											//i'm declaring the object here not in the method generatePositionn()
 	
 		if (rightward >= 0 && rightward <= 1) { //saves every coordinate if a sensor has a positive value between 0 and 1
 			border.saveBorderCordinates(generatePosition(borderPosition, rightward, static_cast <T>(0)));	
@@ -106,7 +107,7 @@ public:
 
 	 Vec2<T>& generatePosition(Vec2<T>& borderPosition, T xSensor, T ySensor) {
 
-		 borderPosition = position; //we need this otherwise if we get 2 or more border points we won't get the right calculations
+		 borderPosition = position; //we need this otherwise if we get 2 or more border points at the same time, we won't get the right calculations
 
 		 borderPosition.x += xSensor;
 		 borderPosition.y += ySensor;
@@ -175,10 +176,10 @@ private:
 	Vec2<T> position;	//the base constructor of Vec2 sets the X and Y cordinates to 0
 	Vec2<T> velocity;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
 	Vec2<T> right;	
-	Vec2<T> up;		//the four patterns we can go (right = 1,0  ;  up = 0,1  ;  left = -1,0  ;  down = 0,-1)
+	Vec2<T> up;		//the four paths we can go (right = 1,0  ;  up = 0,1  ;  left = -1,0  ;  down = 0,-1)
 	Vec2<T> left;
 	Vec2<T> down;
-	Border<T> border;	//where we save the found borders
+	Border<T> border;	//where we save found borders
 };
 
 

@@ -73,7 +73,7 @@ int main() {		//this main method is just so i can check if the logic works corre
 		}
 
 
-		if (integrateResult == 0) {	//will edn the loop if we found the same stat up border point or is it really close 
+		if (integrateResult == 0) {	//will end the loop if we found the same stating border point or if it's really close 
 			shouldMap = false;
 		}
 	}
