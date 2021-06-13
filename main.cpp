@@ -1,9 +1,17 @@
 #include "Mapper.h"
+#include "IMapper.h"
+#include "Vec2.h"
+#include "IBorder.h"
 
-int main() {
+#include<iostream>
+#include<vector>
+
+int main() {		//this main method is just so i can check if the logic works correctly
+					
 	Mapper<double> mapper;
 	double array[16][12] = { 
 {1,1,1,1,1,1,1,1,1,1,1,1},
+{1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,1},
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
@@ -16,8 +24,7 @@ int main() {
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
 {1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
+{1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,1},
 {1,1,1,1,1,1,1,1,1,1,1,1}};
 
 	unsigned int realPositionX = 8;
@@ -26,7 +33,7 @@ int main() {
 	bool shouldMap = true;
 
 	realPositionX++;
-	
+	std::cout << "Moving path: \n";
 	while (shouldMap) {
 		
 		double aheadSensor = array[realPositionY - 1][realPositionX];
@@ -35,10 +42,10 @@ int main() {
 		double rightSensor = array[realPositionY][realPositionX + 1];
 
 		double arrayPosition[4] = {aheadSensor, leftSensor, downSensor, rightSensor};
+		
+		std::cout << "X:"<< mapper.getVelocity().x << "   Y:" << mapper.getVelocity().y << '\n';
 
-		std::cout << mapper.getVelocity().x << " " << mapper.getVelocity().y << '\n';
-
-		int integrateResult = mapper.integrate(0.1, arrayPosition);
+		int integrateResult = mapper.integrate(0.9, arrayPosition);
 
 		Vec2<double> velocity = mapper.getVelocity();
 		bool ifRight = (velocity.x == 1 && velocity.y == 0);	//helping bools telling us where we are going atm.
@@ -68,9 +75,10 @@ int main() {
 			shouldMap = false;
 		}
 	}
-
+	std::cout << '\n' << "Borders found : \n";
+	std::cout.precision(2);
 	for (int k = 0; k < (mapper.getBorder()).getCount(); k++ ) {
-		std::cout << ((mapper.getBorder())[k]).x << " " << ((mapper.getBorder())[k]).y << '\n';
+		std::cout << "X: " << std::fixed << ((mapper.getBorder())[k]).x << "  Y:  " << ((mapper.getBorder())[k]).y << '\n';
 	}
 	return 0;
 }

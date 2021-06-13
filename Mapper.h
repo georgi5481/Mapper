@@ -16,8 +16,8 @@ public:
 
 	int checkIfLastBorder() {
 		if (polylines.size() > 1) {
-			bool closeX = (polylines[0].x - polylines.rbegin()->x) < 0.05 && (polylines[0].x - polylines.rbegin()->x) > -0.05;
-			bool closeY = (polylines[0].y - polylines.rbegin()->y) < 0.05 && (polylines[0].y - polylines.rbegin()->y) > -0.05;
+			bool closeX = (polylines[0].x - polylines.rbegin()->x) < 0.01 && (polylines[0].x - polylines.rbegin()->x) > -0.01;
+			bool closeY = (polylines[0].y - polylines.rbegin()->y) < 0.01 && (polylines[0].y - polylines.rbegin()->y) > -0.01;
 
 			if (closeX && closeY)
 			{			//if the container isn't empty and the first and last elements are the same or really close in the coordinate system
@@ -63,9 +63,7 @@ public:
 	const IBorder<T>& getBorder() const {
 
 		return border;
-
 	}
-
 
 	int integrate(T dt, const T* sensor) {
 
@@ -80,19 +78,20 @@ public:
 		velocity = whereToGo(ahead, leftward, astern, rightward);	//pick where to go next
 
 		Vec2<T> borderPosition = position;	//since it isn't good to return a reference from a method, i'm declaring the object here not in the method below
-
-		if (ahead >= 0) {
-			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), ahead));	//saves every coordinate if a sensor has a positive value
+	
+		if (rightward >= 0 && rightward <= 1) { //saves every coordinate if a sensor has a positive value between 0 and 1
+			border.saveBorderCordinates(generatePosition(borderPosition, rightward, static_cast <T>(0)));	
 		}
-		if (leftward >= 0) {
+		if (ahead >= 0 && ahead <= 1) {
+			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), ahead));	
+		}
+		if (leftward >= 0 && leftward <= 1) {
 			border.saveBorderCordinates(generatePosition(borderPosition, -leftward, static_cast<T>(0)));
 		}
-		if (astern >= 0) {
+		if (astern >= 0 && astern <= 1) {
 			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), -astern));
 		}
-		if (rightward >= 0) {
-			border.saveBorderCordinates(generatePosition(borderPosition, rightward, static_cast < T>(0)));
-		}
+
 
 		if (ahead >= 0 && leftward >= 0 && astern >= 0 && rightward >= 0)	//in case the four sensors recieve a value
 		{
@@ -102,7 +101,6 @@ public:
 			return border.checkIfLastBorder();
 		}
 	}
-
 
  private:
 
@@ -123,7 +121,7 @@ public:
 		 bool ifDown = (velocity.x == down.x && velocity.y == down.y);
 		 bool ifUp = (velocity.x == up.x && velocity.y == up.y);
 
-		 if (ifRight || ifUp ) {	//if we move right
+		 if (ifRight || ifUp ) {	//if we move right or up it is the same logic exept in 1 condition below
 			 if (rightSensor >= 0) {
 				 if (aheadSensor >= 0) {
 					 if (leftSensor >= 0) {
@@ -146,7 +144,7 @@ public:
 				 }
 			 }
 		 }
-		 else if (ifLeft || ifDown) { //if we move left
+		 else if (ifLeft || ifDown) { //if we move left or down we follow the same logic exept in 1 condition
 			 if (leftSensor >= 0) {
 				 if (asternSensor >= 0) {
 					 if (rightSensor >= 0) {
@@ -185,15 +183,3 @@ private:
 
 
 
-
-/*
-int main() {										//this was just for some tests	!
-	Mapper<double> object;
-	double array[4] = { -1 ,-1 , 0.9 ,-1 };
-	for (double i = 0.1; i < 0.9 ; i=i+0.1) {
-		std::cout << object.getVelocity().x << " " << object.getVelocity().y << '\n';
-
-		object.integrate(i, array);
-	}
-	return 0;
-}*/
