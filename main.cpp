@@ -8,52 +8,59 @@
 
 int main() {		//this main method is just so i can check if the logic works correctly
 					
-	Mapper<double> mapper;
-	double array[16][12] = { 
-{1,1,1,1,1,1,1,1,1,1,1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1},
-{1,-1,-1,-1,-1,-1,-1,-1,1,-1,-1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1}};
+	Mapper<float> mapper;
+	float array[18][14] = { 
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,0.1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0.1,0},
+{0,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0} };
 
-	unsigned int realPositionX = 8;
-	unsigned int realPositionY = 3;
+	unsigned int realPositionX = 7;
+	unsigned int realPositionY = 4;
 
 	bool shouldMap = true;
 
 	realPositionX++;	//since we always start moving right we need the sensors right from us from the start position
-
-	std::cout << "Moving path: \n";
+	std::cout.precision(2);
+	std::cout << std::fixed << "Moving path:		Borders coordintes: \n";	//just for some help
 	while (shouldMap) {
 		
-		double aheadSensor = array[realPositionY - 1][realPositionX];		//taking the sensors value
-		double leftSensor = array[realPositionY][realPositionX - 1];
-		double downSensor = array[realPositionY + 1][realPositionX];
-		double rightSensor = array[realPositionY][realPositionX + 1];
+		float aheadSensor = array[realPositionY - 1][realPositionX];		//taking the sensors value
+		float leftSensor = array[realPositionY][realPositionX - 1];
+		float downSensor = array[realPositionY + 1][realPositionX];
+		float rightSensor = array[realPositionY][realPositionX + 1];
 
-		double arrayPosition[4] = {aheadSensor, leftSensor, downSensor, rightSensor};
+		float arrayPosition[4] = {aheadSensor, leftSensor, downSensor, rightSensor};
 		
-		std::cout << "X:"<< mapper.getVelocity().x << "   Y:" << mapper.getVelocity().y << '\n';
+		std::cout << "\nX:"<< mapper.getVelocity().x << "   Y:" << mapper.getVelocity().y << "	";
 
-		int integrateResult = mapper.integrate(0.9, arrayPosition);
+		int integrateResult = mapper.integrate(0.1f, arrayPosition);
 
-		Vec2<double> velocity = mapper.getVelocity();
+		Vec2<float> velocity = mapper.getVelocity();
 
 		bool ifRight = (velocity.x == 1 && velocity.y == 0);	//helping bools telling us where we are going atm.
 		bool ifLeft = (velocity.x == -1 && velocity.y == 0);
 		bool ifDown = (velocity.x == 0 && velocity.y == -1);
 		bool ifUp = (velocity.x == 0 && velocity.y == 1);
+
+		bool ifUpRight = (velocity.x == 1 && velocity.y == 1);
+		bool ifUpLeft = (velocity.x == -1 && velocity.y == 1);
+		bool ifDownRight = (velocity.x == 1 && velocity.y == -1);
+		bool ifDownLeft = (velocity.x == -1 && velocity.y == -1);
 
 		if (ifRight)		//depending on where we go, we change position in the helping array we build
 		{
@@ -62,6 +69,26 @@ int main() {		//this main method is just so i can check if the logic works corre
 		else if (ifLeft)
 		{
 			realPositionX--;
+		}
+		else if (ifUpRight)
+		{
+			realPositionX++;
+			realPositionY--;
+		}
+		else if (ifUpLeft)
+		{
+			realPositionX--;
+			realPositionY--;
+		}
+		else if (ifDownLeft)
+		{
+			realPositionX--;
+			realPositionY++;
+		}
+		else if (ifDownRight)
+		{
+			realPositionX++;
+			realPositionY++;
 		}
 		else if (ifDown)
 		{
@@ -77,11 +104,11 @@ int main() {		//this main method is just so i can check if the logic works corre
 			shouldMap = false;
 		}
 	}
-	std::cout << '\n' << "Borders found : \n";
-	std::cout.precision(2);
 
-	for (int k = 0; k < (mapper.getBorder()).getCount(); k++ ) {		//printing all the border points we found
-		std::cout << "X: " << std::fixed << ((mapper.getBorder())[k]).x << "  Y:  " << ((mapper.getBorder())[k]).y << '\n';
-	}
+	//std::cout.precision(2);
+
+	//for (int k = 0; k < mapper.getBorderSize(); k++ ) {		//printing all the border points we found
+	//	std::cout << "X: " << std::fixed << mapper[k].x << "  Y:  " << mapper[k].y << '\n';
+	//}
 	return 0;
 }
