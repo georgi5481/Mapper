@@ -51,7 +51,7 @@ class Mapper : public IMapper<T> {
 public:
 	
 
-	Mapper() : velocity(1, 0), right(1, 0), upRight(1,1), up(0, 1), upLeft(-1,1), left(-1, 0), downLeft(-1,-1), down(0, -1), downRight(1,-1)
+	Mapper() : direction(1, 0), right(1, 0), upRight(1,1), up(0, 1), upLeft(-1,1), left(-1, 0), downLeft(-1,-1), down(0, -1), downRight(1,-1)
 	{	//sets the initial velocity and the directions
 
 	}
@@ -61,7 +61,7 @@ public:
 	}
 	const Vec2<T>& getVelocity() const {
 
-		return velocity;
+		return direction;
 	}
 	const IBorder<T>& getBorder() const {
 
@@ -76,37 +76,43 @@ public:
 	
 
 	int integrate(T dt, const T* sensor) {
-
-		position.x += (velocity.x * dt);	//calculates the postion at the moment
-		position.y += (velocity.y * dt);
+		Vec2<T> velocityVector;
+		velocityVector.x = direction.x * dt;
+		velocityVector.y = direction.y * dt;
 
 		T ahead = *sensor;
 		T leftward = (*(sensor + 1));		//getting out the 4 values from the input array
 		T astern = (*(sensor +  2));
 		T rightward = (*(sensor + 3));
 
-		velocity = whereToGo(ahead, leftward, astern, rightward, dt);	//pick where to go next
+		position.x += velocityVector.x;	//calculates the postion at the moment
+		position.y += velocityVector.y;
+		
+		direction = whereToGo(ahead, leftward, astern, rightward, dt);	//pick where to go next
 
-		Vec2<T> borderPosition = position;	//since it isn't good to return a reference from a method,
-											//i'm declaring the object here not in the method generatePositionn()
+
+		Vec2<T> borderPosition;
+		borderPosition.x = position.x + direction.x;	//since it isn't good to return a reference from a method,
+		borderPosition.y = position.y + direction.y;	//i'm declaring the object here not in the method generatePositionn()
 	
+		
+
 		if (rightward >= 0 && rightward <= 1) { //saves every coordinate if a sensor has a positive value between 0 and 1
 			border.saveBorderCordinates(generatePosition(borderPosition, rightward, static_cast <T>(0)));	
-		//	std::cout << "		right X: " << borderPosition.x << "  Y:" << borderPosition.y;	
+			std::cout << "		Right X: " << borderPosition.x << "  Y:" << borderPosition.y;	
 		}
 		if (ahead >= 0 && ahead <= 1) {
 			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), ahead));
-		//	std::cout <<"		up X: " << borderPosition.x << "  Y:" << borderPosition.y;			//prints the found border coordinates
+			std::cout <<"		Up X: " << borderPosition.x << "  Y:" << borderPosition.y;			//prints the found border coordinates
 		}
 		if (leftward >= 0 && leftward <= 1) {
 			border.saveBorderCordinates(generatePosition(borderPosition, -leftward, static_cast<T>(0)));
-		//	std::cout << "		left X: " << borderPosition.x << "  Y:" << borderPosition.y;
+			std::cout << "		Left X: " << borderPosition.x << "  Y:" << borderPosition.y;
 		}
 		if (astern >= 0 && astern <= 1) {
 			border.saveBorderCordinates(generatePosition(borderPosition, static_cast<T>(0), -astern));
-		//	std::cout << "		down X: " << borderPosition.x << "  Y:" << borderPosition.y;
+			std::cout << "		Down X: " << borderPosition.x << "  Y:" << borderPosition.y;
 		}
-
 
 
 		if (ahead >= 0 && leftward >= 0 && astern >= 0 && rightward >= 0)	//in case the four sensors recieve a value
@@ -134,44 +140,44 @@ public:
 
 	 Vec2<T> whereToGo(T& aheadSensor, T& leftSensor, T& asternSensor, T& rightSensor, T& dt) {
 
-		 bool ifRight = (velocity.x == right.x && velocity.y == right.y);	//helping bools telling us where we are going atm.
-		 bool ifLeft = (velocity.x == left.x && velocity.y == left.y);
-		 bool ifDown = (velocity.x == down.x && velocity.y == down.y);
-		 bool ifUp = (velocity.x == up.x && velocity.y == up.y);
-		 bool ifUpRight = (velocity.x == upRight.x && velocity.y == upRight.y);
-		 bool ifUpLeft = (velocity.x == upLeft.x && velocity.y == upLeft.y);
-		 bool ifDownLeft = (velocity.x == downLeft.x && velocity.y == downLeft.y);
-		 bool ifDownRight = (velocity.x == downRight.x && velocity.y == downRight.y);
+		 bool ifRight = (direction.x == right.x && direction.y == right.y);	//helping bools telling us where we are going atm.
+		 bool ifLeft = (direction.x == left.x && direction.y == left.y);
+		 bool ifDown = (direction.x == down.x && direction.y == down.y);
+		 bool ifUp = (direction.x == up.x && direction.y == up.y);
+		 bool ifUpRight = (direction.x == upRight.x && direction.y == upRight.y);
+		 bool ifUpLeft = (direction.x == upLeft.x && direction.y == upLeft.y);
+		 bool ifDownLeft = (direction.x == downLeft.x && direction.y == downLeft.y);
+		 bool ifDownRight = (direction.x == downRight.x && direction.y == downRight.y);
 
-		 bool checkDiagonalsRightX = velocity.x != 0 && rightSensor >= 0 && aheadSensor < 0 && (velocity.x * dt) < rightSensor;
-		 bool checkDiagonalsLeftX = velocity.x != 0 && leftSensor >= 0 && asternSensor < 0 && (velocity.x * dt) < leftSensor;
+		 bool checkDiagonalsRightX = direction.x != 0 && rightSensor >= 0 && aheadSensor < 0 && (direction.x * dt) < rightSensor;
+		 bool checkDiagonalsLeftX = direction.x != 0 && leftSensor >= 0 && asternSensor < 0 && (direction.x * dt) < leftSensor;
 
 		 if (ifRight || ifUp || ifUpRight || ifUpLeft) {	//if we move right or up it is the same logic exept in 1 condition below
 			 if (rightSensor >= 0) {
 				 if (aheadSensor >= 0) {
 					 if (leftSensor >= 0) {
-						 velocity = down;
+						 direction = down;
 					 }
 					 else if (checkDiagonalsLeftX) {
-						 velocity = upLeft;
+						 direction = upLeft;
 					 }
 					 else {
-						 velocity = left;
+						 direction = left;
 					 }
 				 }
 				 else if (checkDiagonalsRightX) {
-					 velocity = upRight;
+					 direction = upRight;
 				 }
 				 else {
-					 velocity = up;
+					 direction = up;
 				 }
 			 }
 			 else {
 				 if (asternSensor < 0 && border.getCount() > 1 && ifRight) {
-					 velocity = down;
+					 direction = down;
 				 }
 				 else {
-					 velocity = right;
+					 direction = right;
 				 }
 			 }
 		 }
@@ -179,38 +185,38 @@ public:
 			 if (leftSensor >= 0) {
 				 if (asternSensor >= 0) {
 					 if (rightSensor >= 0) {
-						 velocity = up;
+						 direction = up;
 					 }
 					 else if (checkDiagonalsRightX) {
-						 velocity = downRight;
+						 direction = downRight;
 					 }
 					 else {
-						 velocity = right;
+						 direction = right;
 					 }
 				 }
 				 else if (checkDiagonalsLeftX) {
-					 velocity = downLeft;
+					 direction = downLeft;
 				 }
 				 else {
-					 velocity = down;
+					 direction = down;
 				 }
 			 }
 			 else {
 				 if (aheadSensor < 0 && ifLeft) {
-					 velocity = up;
+					 direction = up;
 				 }
 				 else {
-					 velocity = left;
+					 direction = left;
 				 }
 			 }
 		 }
-		 return velocity;
+		 return direction;
 	 }
 
 private:
 
 	Vec2<T> position;	//the base constructor of Vec2 sets the X and Y cordinates to 0
-	Vec2<T> velocity;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
+	Vec2<T> direction;	//the base constructor of this class Mapper will set the initial velocity to (1, 0)
 
 	Vec2<T> right;	
 	Vec2<T> upRight;

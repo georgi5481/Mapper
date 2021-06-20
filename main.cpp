@@ -106,7 +106,6 @@ int main() {		//this main method is just so i can check if the logic works corre
 	}
 
 	//std::cout.precision(2);
-
 	//for (int k = 0; k < mapper.getBorderSize(); k++ ) {		//printing all the border points we found
 	//	std::cout << "X: " << std::fixed << mapper[k].x << "  Y:  " << mapper[k].y << '\n';
 	//}
